@@ -1,1 +1,0 @@
-/usr/bin/clang++  -g   CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/Bus.cpp.o CMakeFiles/main.dir/cg6502.cpp.o CMakeFiles/main.dir/common.cpp.o  -o main 
