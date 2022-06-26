@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <map>
 
 class Bus;
 
@@ -37,7 +38,16 @@ class cg6502
 	void irq();
 	void nmi();
 
+	// Indicates the current instruction has completed by returning true. This is
+	// a utility function to enable "step-by-step" execution, without manually 
+	// clocking every cycle
+	bool complete();
+
 	void connect_to_bus(Bus *n) { bus = n; }
+
+	// Produces a map of strings, with keys equivalent to instruction start locations
+	// in memory, for the specified address range
+	std::map<uint16_t, std::string> disassemble(uint16_t nStart, uint16_t nStop);
 
 	uint8_t opcode	  = 0x00;
 	struct INSTRUCTION
