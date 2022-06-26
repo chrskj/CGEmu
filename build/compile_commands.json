@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/chrisgsk/projects/CGEmu/build/src",
+  "command": "/usr/bin/clang++   -I/home/chrisgsk/projects/CGEmu/src  -g   -std=gnu++11 -o CMakeFiles/main.dir/main.cpp.o -c /home/chrisgsk/projects/CGEmu/src/main.cpp",
+  "file": "/home/chrisgsk/projects/CGEmu/src/main.cpp"
+},
+{
+  "directory": "/home/chrisgsk/projects/CGEmu/build/src",
+  "command": "/usr/bin/clang++   -I/home/chrisgsk/projects/CGEmu/src  -g   -std=gnu++11 -o CMakeFiles/main.dir/Bus.cpp.o -c /home/chrisgsk/projects/CGEmu/src/Bus.cpp",
+  "file": "/home/chrisgsk/projects/CGEmu/src/Bus.cpp"
+},
+{
+  "directory": "/home/chrisgsk/projects/CGEmu/build/src",
+  "command": "/usr/bin/clang++   -I/home/chrisgsk/projects/CGEmu/src  -g   -std=gnu++11 -o CMakeFiles/main.dir/cg6502.cpp.o -c /home/chrisgsk/projects/CGEmu/src/cg6502.cpp",
+  "file": "/home/chrisgsk/projects/CGEmu/src/cg6502.cpp"
+},
+{
+  "directory": "/home/chrisgsk/projects/CGEmu/build/src",
+  "command": "/usr/bin/clang++   -I/home/chrisgsk/projects/CGEmu/src  -g   -std=gnu++11 -o CMakeFiles/main.dir/common.cpp.o -c /home/chrisgsk/projects/CGEmu/src/common.cpp",
+  "file": "/home/chrisgsk/projects/CGEmu/src/common.cpp"
+}
+]
