@@ -136,8 +136,8 @@ class Example : public olc::PixelGameEngine
 
 		// Dont forget to set IRQ and NMI vectors if you want to play with those
 
-		std::string file = "/home/chrisgsk/projects/CGEmu/myfile.bin";
-		load_file(file, Nes.ram);
+		// std::string file = "/home/chrisgsk/projects/CGEmu/myfile.bin";
+		// load_file(file, Nes.ram);
 
 		// Extract dissassembly
 		mapAsm = Nes.cpu.disassemble(0x0000, 0xFFFF);
