@@ -1,6 +1,6 @@
 #include "CppUTest/CommandLineTestRunner.h"
 
-IMPORT_TEST_GROUP(cg6502);
+IMPORT_TEST_GROUP(TestCpu);
 
 int main(int argc, char** argv)
 {

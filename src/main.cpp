@@ -143,7 +143,7 @@ class Example : public olc::PixelGameEngine
 		mapAsm = Nes.cpu.disassemble(0x0000, 0xFFFF);
 
 		// Reset
-		// Nes.cpu.reset();
+		Nes.cpu.reset();
 		return true;
 	}
 
@@ -159,8 +159,8 @@ class Example : public olc::PixelGameEngine
 			} while (!Nes.cpu.complete());
 		}
 
-		// if (GetKey(olc::Key::R).bPressed)
-		// 	Nes.cpu.reset();
+		if (GetKey(olc::Key::R).bPressed)
+			Nes.cpu.reset();
 
 		// if (GetKey(olc::Key::I).bPressed)
 		// 	Nes.cpu.irq();

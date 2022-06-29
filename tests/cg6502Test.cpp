@@ -1,11 +1,15 @@
 #include "cg6502.hpp"
+#include "Bus.hpp"
 #include "CppUTest/TestHarness.h" // Include after personal includes
 
-TEST_GROUP(cg6502)
+TEST_GROUP(TestCpu)
 {
 };
 
-TEST(cg6502, FirstTest)
+TEST(TestCpu, testReset)
 {
-   FAIL("Fail me!");
+    // cg6502 test_cpu;
+    // test_cpu.reset();
+    // test_cpu.
+    FAIL("Fail me!");
 }

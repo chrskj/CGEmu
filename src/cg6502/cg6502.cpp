@@ -74,12 +74,19 @@ void cg6502::clock()
 		uint8_t additional_cycle_2 = (this->*lookup[opcode].operate)();
 
 		cycles += (additional_cycle_1 & additional_cycle_2);
+		printf("\ncycles: %d", cycles);
 	}
+	printf(" tap");
 	cycles--;
 }
 
 void cg6502::reset()
 {
+	// cycles = 6;
+	set_flag(I);
+	uint8_t PC_low	= read(0xFFFC);
+	uint8_t PC_high = read(0xFFFD);
+	PC				= ((uint16_t)PC_high << 8) | PC_low;
 }
 void cg6502::irq()
 {
@@ -88,20 +95,103 @@ void cg6502::nmi()
 {
 }
 
+// Something something
+uint8_t cg6502::ACC()
+{
+	return 0;
+}
+uint8_t cg6502::IMP()
+{
+	return 0;
+}
+uint8_t cg6502::IMM()
+{
+	addr_abs = PC;
+	return 0;
+}
+uint8_t cg6502::ZP0()
+{
+	return 0;
+}
+uint8_t cg6502::ZPX()
+{
+	return 0;
+}
+uint8_t cg6502::ZPY()
+{
+	return 0;
+}
+uint8_t cg6502::ABS()
+{
+	uint8_t addr_abs_low  = read(PC);
+	uint8_t addr_abs_high = read(PC + 1);
+	addr_abs			  = ((uint16_t)addr_abs_high << 8) | addr_abs_low;
+
+	return 0;
+}
+uint8_t cg6502::ABX()
+{
+	return 0;
+}
+uint8_t cg6502::ABY()
+{
+	return 0;
+}
+uint8_t cg6502::IND()
+{
+	return 0;
+}
+uint8_t cg6502::IZX()
+{
+	return 0;
+}
+uint8_t cg6502::IZY()
+{
+	return 0;
+}
+uint8_t cg6502::REL()
+{
+	return 0;
+}
+
+// This function sources the data used by the instruction into
+// a convenient numeric variable. Some instructions dont have to
+// fetch data as the source is implied by the instruction. For example
+// "INX" increments the X register. There is no additional data
+// required. For all other addressing modes, the data resides at
+// the location held within addr_abs, so it is read from there.
+// Immediate adress mode exploits this slightly, as that has
+// set addr_abs = pc + 1, so it fetches the data from the
+// next byte for example "LDA $FF" just loads the accumulator with
+// 256, i.e. no far reaching memory fetch is required. "fetched"
+// is a variable global to the CPU, and is set by calling this
+// function. It also returns it for convenience.
+uint8_t cg6502::fetch()
+{
+	if (!(lookup[opcode].addrmode == &cg6502::IMP))
+		fetched = read(addr_abs);
+	return fetched;
+}
 
 // Load Accumulator
 uint8_t cg6502::LDA()
 {
+	fetch();
+	A = fetched;
 	return 0;
 }
 // Load X Register
 uint8_t cg6502::LDX()
 {
+	fetch();
+	X = fetched;
 	return 0;
 }
 // Load Y Register
 uint8_t cg6502::LDY()
 {
+	fetch();
+	Y = fetched;
 	return 0;
 }
 // Store Accumulator
@@ -112,6 +202,7 @@ uint8_t cg6502::STA()
 // Store X Register
 uint8_t cg6502::STX()
 {
+	write(addr_abs, X);
 	return 0;
 }
 // Store Y Register
@@ -374,60 +465,6 @@ uint8_t cg6502::XXX()
 {
 	return 0;
 }
-// Something something
-uint8_t cg6502::ACC()
-{
-	return 0;
-}
-uint8_t cg6502::IMP()
-{
-	return 0;
-}
-uint8_t cg6502::IMM()
-{
-	return 0;
-}
-uint8_t cg6502::ZP0()
-{
-	return 0;
-}
-uint8_t cg6502::ZPX()
-{
-	return 0;
-}
-uint8_t cg6502::ZPY()
-{
-	return 0;
-}
-uint8_t cg6502::ABS()
-{
-	return 0;
-}
-uint8_t cg6502::ABX()
-{
-	return 0;
-}
-uint8_t cg6502::ABY()
-{
-	return 0;
-}
-uint8_t cg6502::IND()
-{
-	return 0;
-}
-uint8_t cg6502::IZX()
-{
-	return 0;
-}
-uint8_t cg6502::IZY()
-{
-	return 0;
-}
-uint8_t cg6502::REL()
-{
-	return 0;
-}
-
 bool cg6502::complete()
 {
 	return cycles == 0;
