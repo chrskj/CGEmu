@@ -74,9 +74,7 @@ void cg6502::clock()
 		uint8_t additional_cycle_2 = (this->*lookup[opcode].operate)();
 
 		cycles += (additional_cycle_1 & additional_cycle_2);
-		printf("\ncycles: %d", cycles);
 	}
-	printf(" tap");
 	cycles--;
 }
 
@@ -106,7 +104,7 @@ uint8_t cg6502::IMP()
 }
 uint8_t cg6502::IMM()
 {
-	addr_abs = PC;
+	addr_abs = PC++;
 	return 0;
 }
 uint8_t cg6502::ZP0()
@@ -123,8 +121,8 @@ uint8_t cg6502::ZPY()
 }
 uint8_t cg6502::ABS()
 {
-	uint8_t addr_abs_low  = read(PC);
-	uint8_t addr_abs_high = read(PC + 1);
+	uint8_t addr_abs_low  = read(PC++);
+	uint8_t addr_abs_high = read(PC++);
 	addr_abs			  = ((uint16_t)addr_abs_high << 8) | addr_abs_low;
 
 	return 0;
@@ -173,6 +171,14 @@ uint8_t cg6502::fetch()
 	return fetched;
 }
 
+void cg6502::ZN_eval(uint8_t _reg)
+{
+	if (_reg == 0)
+		set_flag(Z);
+	if (_reg < 0)
+		set_flag(N);
+}
+
 // Load Accumulator
 uint8_t cg6502::LDA()
 {
@@ -197,6 +203,7 @@ uint8_t cg6502::LDY()
 // Store Accumulator
 uint8_t cg6502::STA()
 {
+	write(addr_abs, A);
 	return 0;
 }
 // Store X Register
@@ -208,36 +215,49 @@ uint8_t cg6502::STX()
 // Store Y Register
 uint8_t cg6502::STY()
 {
+	write(addr_abs, Y);
 	return 0;
 }
 // Transfer accumulator to X
 uint8_t cg6502::TAX()
 {
+	X = A;
+	ZN_eval(X);
 	return 0;
 }
 // Transfer accumulator to Y
 uint8_t cg6502::TAY()
-{
+{	
+	Y = A;
+	ZN_eval(Y);
 	return 0;
 }
 // Transfer X to accumulator
 uint8_t cg6502::TXA()
 {
+	A = X;
+	ZN_eval(A);
 	return 0;
 }
 // Transfer Y to accumulator
 uint8_t cg6502::TYA()
 {
+	A = Y;
+	ZN_eval(A);
 	return 0;
 }
 // Transfer stack pointer to X
 uint8_t cg6502::TSX()
 {
+	X = S;
+	ZN_eval(X);
 	return 0;
 }
 // Transfer X to stack pointer
 uint8_t cg6502::TXS()
 {
+	S = X;
+	ZN_eval(S);
 	return 0;
 }
 // Push accumulator on stack
@@ -328,11 +348,15 @@ uint8_t cg6502::DEC()
 // Decrement the X register
 uint8_t cg6502::DEX()
 {
+	X--;
+	ZN_eval(X);
 	return 0;
 }
 // Decrement the Y register
 uint8_t cg6502::DEY()
 {
+	Y--;
+	ZN_eval(Y);
 	return 0;
 }
 // Arithmetic Shift Left
@@ -413,36 +437,43 @@ uint8_t cg6502::BVS()
 // Clear carry flag
 uint8_t cg6502::CLC()
 {
+	clear_flag(C);
 	return 0;
 }
 // Clear decimal mode flag
 uint8_t cg6502::CLD()
 {
+	clear_flag(D);
 	return 0;
 }
 // Clear interrupt disable flag
 uint8_t cg6502::CLI()
 {
+	clear_flag(I);
 	return 0;
 }
 // Clear overflow flag
 uint8_t cg6502::CLV()
 {
+	clear_flag(V);
 	return 0;
 }
 // Set carry flag
 uint8_t cg6502::SEC()
 {
+	set_flag(C);
 	return 0;
 }
 // Set decimal mode flag
 uint8_t cg6502::SED()
 {
+	set_flag(D);
 	return 0;
 }
 // Set interrupt disable flag
 uint8_t cg6502::SEI()
 {
+	set_flag(I);
 	return 0;
 }
 // Force an interrupt

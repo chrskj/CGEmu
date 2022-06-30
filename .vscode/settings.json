@@ -2,6 +2,7 @@
     "files.associations": {
         "tuple": "cpp",
         "*.tcc": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "atomic": "cpp"
     }
 }
