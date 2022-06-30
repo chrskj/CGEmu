@@ -124,7 +124,6 @@ uint8_t cg6502::ABS()
 	uint8_t addr_abs_low  = read(PC++);
 	uint8_t addr_abs_high = read(PC++);
 	addr_abs			  = ((uint16_t)addr_abs_high << 8) | addr_abs_low;
-
 	return 0;
 }
 uint8_t cg6502::ABX()
@@ -149,6 +148,9 @@ uint8_t cg6502::IZY()
 }
 uint8_t cg6502::REL()
 {
+	addr_rel = read(PC++);
+	if (addr_rel & 0x80)
+		addr_rel |= 0xFF00;
 	return 0;
 }
 
@@ -397,41 +399,121 @@ uint8_t cg6502::RTS()
 // Branch if carry flag clear
 uint8_t cg6502::BCC()
 {
+	if (get_flag(C) == 0)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Branch if carry flag set
 uint8_t cg6502::BCS()
 {
+	if (get_flag(C) == 1)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Branch if zero flag set
 uint8_t cg6502::BEQ()
 {
+	if (get_flag(Z) == 1)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Branch if negative flag set
 uint8_t cg6502::BMI()
 {
+	if (get_flag(N) == 1)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Branch if zero flag clear
 uint8_t cg6502::BNE()
 {
+	if (get_flag(Z) == 0)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Branch if negative flag clear
 uint8_t cg6502::BPL()
 {
+	if (get_flag(N) == 0)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Branch if overflow flag clear
 uint8_t cg6502::BVC()
 {
+	if (get_flag(V) == 0)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Branch if overflow flag set
 uint8_t cg6502::BVS()
 {
+	if (get_flag(V) == 1)
+	{
+		cycles++;
+		addr_abs = PC + addr_rel;
+
+		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
+			cycles++;
+
+		PC = addr_abs;
+	}
 	return 0;
 }
 // Clear carry flag
