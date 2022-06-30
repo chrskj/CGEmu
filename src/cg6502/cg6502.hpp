@@ -15,14 +15,14 @@ class cg6502
 
 	enum Status_flag
 	{
-		C = (1 << 0),  // Carry
-		Z = (1 << 1),  // Zero
-		I = (1 << 2),  // IRQ Disable
-		D = (1 << 3),  // Decimal Mode
-		B = (1 << 4),  // BRK Command
-		U = (1 << 5),  // Not Used
-		V = (1 << 6),  // Overflow
-		N = (1 << 7),  // Negative
+		C = 0,  // Carry
+		Z = 1,  // Zero
+		I = 2,  // IRQ Disable
+		D = 3,  // Decimal Mode
+		B = 4,  // BRK Command
+		U = 5,  // Not Used
+		V = 6,  // Overflow
+		N = 7,  // Negative
 	};
 
 	// CPU Core registers,
@@ -103,22 +103,22 @@ class cg6502
 
 	uint8_t get_flag(Status_flag f)
 	{
-		return !!(P & f);  // '!!' to make sure this returns 0 or 1
+		return !!(P & (1 << f));  // '!!' to make sure this returns 0 or 1
 	}
 
-	void set_flag(Status_flag f)
+	void set_flag(Status_flag f, uint8_t v)
 	{
-		P |= f;
+		P |= (v << f);
 	}
 
 	void clear_flag(Status_flag f)
 	{
-		P &= ~f;
+		P &= ~(1 << f);
 	}
 
 	void toggle_flag(Status_flag f)
 	{
-		P ^= f;
+		P ^= (1 << f);
 	}
 
 	// struct INSTRUCTION
