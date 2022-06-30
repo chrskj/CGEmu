@@ -15,14 +15,14 @@ class cg6502
 
 	enum Status_flag
 	{
-		C = 0,  // Carry
-		Z = 1,  // Zero
-		I = 2,  // IRQ Disable
-		D = 3,  // Decimal Mode
-		B = 4,  // BRK Command
-		U = 5,  // Not Used
-		V = 6,  // Overflow
-		N = 7,  // Negative
+		C = (1 << 0),  // Carry
+		Z = (1 << 1),  // Zero
+		I = (1 << 2),  // IRQ Disable
+		D = (1 << 3),  // Decimal Mode
+		B = (1 << 4),  // BRK Command
+		U = (1 << 5),  // Not Used
+		V = (1 << 6),  // Overflow
+		N = (1 << 7),  // Negative
 	};
 
 	// CPU Core registers,
@@ -39,7 +39,7 @@ class cg6502
 	void nmi();
 
 	// Indicates the current instruction has completed by returning true. This is
-	// a utility function to enable "step-by-step" execution, without manually 
+	// a utility function to enable "step-by-step" execution, without manually
 	// clocking every cycle
 	bool complete();
 
@@ -49,7 +49,7 @@ class cg6502
 	// in memory, for the specified address range
 	std::map<uint16_t, std::string> disassemble(uint16_t nStart, uint16_t nStop);
 
-	uint8_t opcode	  = 0x00;
+	uint8_t opcode = 0x00;
 	struct INSTRUCTION
 	{
 		std::string name;
@@ -103,22 +103,19 @@ class cg6502
 
 	uint8_t get_flag(Status_flag f)
 	{
-		return !!(P & (1 << f));  // '!!' to make sure this returns 0 or 1
+		return !!(P & f);  // '!!' to make sure this returns 0 or 1
 	}
 
 	void set_flag(Status_flag f, uint8_t v)
 	{
-		P |= (v << f);
+		if (v)
+			P |= f;
+		else
+			P &= ~f;
 	}
-
-	void clear_flag(Status_flag f)
-	{
-		P &= ~(1 << f);
-	}
-
 	void toggle_flag(Status_flag f)
 	{
-		P ^= (1 << f);
+		P ^= f;
 	}
 
 	// struct INSTRUCTION
@@ -130,5 +127,4 @@ class cg6502
 	// };
 
 	// std::vector<INSTRUCTION> lookup;
-
 };

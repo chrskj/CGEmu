@@ -447,25 +447,25 @@ uint8_t cg6502::BVS()
 // Clear carry flag
 uint8_t cg6502::CLC()
 {
-	clear_flag(C);
+	set_flag(C, 0);
 	return 0;
 }
 // Clear decimal mode flag
 uint8_t cg6502::CLD()
 {
-	clear_flag(D);
+	set_flag(D, 0);
 	return 0;
 }
 // Clear interrupt disable flag
 uint8_t cg6502::CLI()
 {
-	clear_flag(I);
+	set_flag(I, 0);
 	return 0;
 }
 // Clear overflow flag
 uint8_t cg6502::CLV()
 {
-	clear_flag(V);
+	set_flag(V, 0);
 	return 0;
 }
 // Set carry flag
