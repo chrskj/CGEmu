@@ -177,8 +177,12 @@ void cg6502::ZN_eval(uint8_t _reg)
 {
 	if (_reg == 0)
 		set_flag(Z, 1);
+	else
+		set_flag(Z, 0);
 	if (_reg < 0)
 		set_flag(N, 1);
+	else
+		set_flag(N, 0);
 }
 
 // Load Accumulator
@@ -224,42 +228,48 @@ uint8_t cg6502::STY()
 uint8_t cg6502::TAX()
 {
 	X = A;
-	ZN_eval(X);
+	set_flag(Z, X == 0x00);
+	set_flag(N, X & 0x80);
 	return 0;
 }
 // Transfer accumulator to Y
 uint8_t cg6502::TAY()
 {	
 	Y = A;
-	ZN_eval(Y);
+	set_flag(Z, Y == 0x00);
+	set_flag(N, Y & 0x80);
 	return 0;
 }
 // Transfer X to accumulator
 uint8_t cg6502::TXA()
 {
 	A = X;
-	ZN_eval(A);
+	set_flag(Z, A == 0x00);
+	set_flag(N, A & 0x80);
 	return 0;
 }
 // Transfer Y to accumulator
 uint8_t cg6502::TYA()
 {
 	A = Y;
-	ZN_eval(A);
+	set_flag(Z, A == 0x00);
+	set_flag(N, A & 0x80);
 	return 0;
 }
 // Transfer stack pointer to X
 uint8_t cg6502::TSX()
 {
 	X = S;
-	ZN_eval(X);
+	set_flag(Z, X == 0x00);
+	set_flag(N, X & 0x80);
 	return 0;
 }
 // Transfer X to stack pointer
 uint8_t cg6502::TXS()
 {
 	S = X;
-	ZN_eval(S);
+	set_flag(Z, S == 0x00);
+	set_flag(N, S & 0x80);
 	return 0;
 }
 // Push accumulator on stack

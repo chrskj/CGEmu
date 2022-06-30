@@ -99,7 +99,6 @@ class cg6502
 	void write(uint16_t a, uint8_t d);
 
 	uint8_t fetch();
-	void ZN_eval(uint8_t _byte);
 
 	uint8_t get_flag(Status_flag f)
 	{
