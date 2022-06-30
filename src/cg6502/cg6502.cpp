@@ -43,9 +43,9 @@ cg6502::cg6502()
 	Y = 0x00;
 	A = 0x00;
 	P = 0x00;
-	set_flag(C);
-	set_flag(Z);
-	set_flag(D);
+	set_flag(C, 1);
+	set_flag(Z, 1);
+	set_flag(D, 1);
 }
 
 cg6502::~cg6502()
@@ -81,7 +81,7 @@ void cg6502::clock()
 void cg6502::reset()
 {
 	// cycles = 6;
-	set_flag(I);
+	set_flag(I, 1);
 	uint8_t PC_low	= read(0xFFFC);
 	uint8_t PC_high = read(0xFFFD);
 	PC				= ((uint16_t)PC_high << 8) | PC_low;
@@ -176,9 +176,9 @@ uint8_t cg6502::fetch()
 void cg6502::ZN_eval(uint8_t _reg)
 {
 	if (_reg == 0)
-		set_flag(Z);
+		set_flag(Z, 1);
 	if (_reg < 0)
-		set_flag(N);
+		set_flag(N, 1);
 }
 
 // Load Accumulator
@@ -193,20 +193,20 @@ uint8_t cg6502::LDX()
 {
 	fetch();
 	X = fetched;
-	return 0;
+	return 1;
 }
 // Load Y Register
 uint8_t cg6502::LDY()
 {
 	fetch();
 	Y = fetched;
-	return 0;
+	return 1;
 }
 // Store Accumulator
 uint8_t cg6502::STA()
 {
 	write(addr_abs, A);
-	return 0;
+	return 1;
 }
 // Store X Register
 uint8_t cg6502::STX()
@@ -305,12 +305,22 @@ uint8_t cg6502::BIT()
 // Add with Carry
 uint8_t cg6502::ADC()
 {
-	return 0;
+	fetch();
+    uint16_t temp = (uint16_t)A + (uint16_t)fetched + (uint16_t)get_flag(C);
+
+	set_flag(C, (temp > 0xFF));
+	set_flag(Z, (temp & 0x00FF) == 0);
+	set_flag(N, temp & 0x80);
+    // The overflow flag is set when the sign of the addends is the same and
+    // differs from the sign of the sum
+	set_flag(V, (~((uint16_t)A ^ (uint16_t)fetched) & ((uint16_t)A ^ (uint16_t)temp) & 0x0080));
+	A = temp & 0x00FF;
+	return 1;
 }
 // Subtract with Carry
 uint8_t cg6502::SBC()
 {
-	return 0;
+	return 1;
 }
 // Compare accumulator
 uint8_t cg6502::CMP()
@@ -330,7 +340,7 @@ uint8_t cg6502::CPY()
 // Increment a memory location
 uint8_t cg6502::INC()
 {
-	return 0;
+	return 1;
 }
 // Increment the X register
 uint8_t cg6502::INX()
@@ -519,43 +529,43 @@ uint8_t cg6502::BVS()
 // Clear carry flag
 uint8_t cg6502::CLC()
 {
-	clear_flag(C);
+	set_flag(C, 0);
 	return 0;
 }
 // Clear decimal mode flag
 uint8_t cg6502::CLD()
 {
-	clear_flag(D);
+	set_flag(D, 0);
 	return 0;
 }
 // Clear interrupt disable flag
 uint8_t cg6502::CLI()
 {
-	clear_flag(I);
+	set_flag(I, 0);
 	return 0;
 }
 // Clear overflow flag
 uint8_t cg6502::CLV()
 {
-	clear_flag(V);
+	set_flag(V, 0);
 	return 0;
 }
 // Set carry flag
 uint8_t cg6502::SEC()
 {
-	set_flag(C);
+	set_flag(C, 1);
 	return 0;
 }
 // Set decimal mode flag
 uint8_t cg6502::SED()
 {
-	set_flag(D);
+	set_flag(D, 1);
 	return 0;
 }
 // Set interrupt disable flag
 uint8_t cg6502::SEI()
 {
-	set_flag(I);
+	set_flag(I, 1);
 	return 0;
 }
 // Force an interrupt

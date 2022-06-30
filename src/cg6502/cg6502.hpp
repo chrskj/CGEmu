@@ -39,7 +39,7 @@ class cg6502
 	void nmi();
 
 	// Indicates the current instruction has completed by returning true. This is
-	// a utility function to enable "step-by-step" execution, without manually 
+	// a utility function to enable "step-by-step" execution, without manually
 	// clocking every cycle
 	bool complete();
 
@@ -49,7 +49,7 @@ class cg6502
 	// in memory, for the specified address range
 	std::map<uint16_t, std::string> disassemble(uint16_t nStart, uint16_t nStop);
 
-	uint8_t opcode	  = 0x00;
+	uint8_t opcode = 0x00;
 	struct INSTRUCTION
 	{
 		std::string name;
@@ -106,16 +106,13 @@ class cg6502
 		return !!(P & f);  // '!!' to make sure this returns 0 or 1
 	}
 
-	void set_flag(Status_flag f)
+	void set_flag(Status_flag f, uint8_t v)
 	{
-		P |= f;
+		if (v)
+			P |= f;
+		else
+			P &= ~f;
 	}
-
-	void clear_flag(Status_flag f)
-	{
-		P &= ~f;
-	}
-
 	void toggle_flag(Status_flag f)
 	{
 		P ^= f;
@@ -130,5 +127,4 @@ class cg6502
 	// };
 
 	// std::vector<INSTRUCTION> lookup;
-
 };
