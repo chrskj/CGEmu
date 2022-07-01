@@ -2,7 +2,6 @@ project(CGEmu)
 
 # include project source
 include_directories(${PROJECT_SOURCE_DIR}/../src)
-include_directories(${PROJECT_SOURCE_DIR}/../src/cg6502)
 # include mocks only for test code
 # include_directories(${PROJECT_SOURCE_DIR}/../mocks)
 # include CppUTest headers
@@ -15,6 +14,10 @@ set_property(TARGET imp_cpputest PROPERTY
 
 # build test library for LedDriver
 add_library(cg6502Test ./cg6502Test.cpp)
+add_library(cg6502  ${PROJECT_SOURCE_DIR}/../src/common.cpp
+                    ${PROJECT_SOURCE_DIR}/../src/cg6502.cpp
+                    ${PROJECT_SOURCE_DIR}/../src/Bus.cpp
+                    )
 
 add_executable(RunAllTests RunAllTests.cpp)
 # target_link_libraries(RunAllTests imp_cpputest cg6502Test LedDriver RuntimeErrorStub)

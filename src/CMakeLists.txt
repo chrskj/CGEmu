@@ -1,9 +1,9 @@
 project(CGEmu)
 include_directories(${CGEmu_SOURCE_DIR})
-include_directories(${CGEmu_SOURCE_DIR}/cg6502/)
-message(STATUS "Include dir: ${CGEmu_SOURCE_DIR}/cg6502/")
+message(STATUS "Include dir: ${CGEmu_SOURCE_DIR}")
 
 set(SOURCES main.cpp
+            cg6502.cpp
             Bus.cpp
             common.cpp
             )
@@ -17,6 +17,5 @@ else()
 endif()
 
 add_executable(main ${SOURCES})
-add_library(cg6502 ./cg6502/cg6502.cpp)
 
-target_link_libraries(main cg6502)
+# target_link_libraries(main cg6502)

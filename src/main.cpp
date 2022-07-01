@@ -100,13 +100,13 @@ class Example : public olc::PixelGameEngine
 
 	bool OnUserCreate() override
 	{
-		// std::string file = "/home/chrisgsk/projects/CGEmu/files/testADC.bin";
-		// load_file(file, Nes.ram, 0x8000, 28);
-		// Nes.ram[0xFFFC] = 0x00;	 // Set Reset Vector
-		// Nes.ram[0xFFFD] = 0x80;
+		std::string file = "/home/chrisgsk/projects/CGEmu/files/testADC.bin";
+		load_file(file, Nes.ram, 0x8000, 28);
+		Nes.ram[0xFFFC] = 0x00;	 // Set Reset Vector
+		Nes.ram[0xFFFD] = 0x80;
 
-		std::string file = "/home/chrisgsk/projects/CGEmu/files/myfile.bin";
-		load_file(file, Nes.ram, 0x0000, 65536);
+		// std::string file = "/home/chrisgsk/projects/CGEmu/files/6502_functional_test.bin";
+		// load_file(file, Nes.ram, 0x0000, 65536);
 
 		// Dont forget to set IRQ and NMI vectors if you want to play with those
 
