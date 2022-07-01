@@ -173,18 +173,6 @@ uint8_t cg6502::fetch()
 	return fetched;
 }
 
-void cg6502::ZN_eval(uint8_t _reg)
-{
-	if (_reg == 0)
-		set_flag(Z, 1);
-	else
-		set_flag(Z, 0);
-	if (_reg < 0)
-		set_flag(N, 1);
-	else
-		set_flag(N, 0);
-}
-
 // Load Accumulator
 uint8_t cg6502::LDA()
 {
@@ -275,6 +263,7 @@ uint8_t cg6502::TXS()
 // Push accumulator on stack
 uint8_t cg6502::PHA()
 {
+	write(S, X);
 	return 0;
 }
 // Push processor status on stack
@@ -371,14 +360,16 @@ uint8_t cg6502::DEC()
 uint8_t cg6502::DEX()
 {
 	X--;
-	ZN_eval(X);
+	set_flag(Z, X == 0x00);
+	set_flag(N, X & 0x80);
 	return 0;
 }
 // Decrement the Y register
 uint8_t cg6502::DEY()
 {
 	Y--;
-	ZN_eval(Y);
+	set_flag(Z, Y == 0x00);
+	set_flag(N, Y & 0x80);
 	return 0;
 }
 // Arithmetic Shift Left

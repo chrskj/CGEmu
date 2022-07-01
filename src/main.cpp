@@ -100,44 +100,15 @@ class Example : public olc::PixelGameEngine
 
 	bool OnUserCreate() override
 	{
-		/*
-			*=$8000
-			LDX #10
-			STX $0000
-			LDX #3
-			STX $0001
-			LDY $0000
-			LDA #0
-			CLC
-			loop
-			ADC $0001
-			DEY
-			BNE loop
-			STA $0002
-			NOP
-			NOP
-			NOP
-		*/
+		// std::string file = "/home/chrisgsk/projects/CGEmu/files/testADC.bin";
+		// load_file(file, Nes.ram, 0x8000, 28);
+		// Nes.ram[0xFFFC] = 0x00;	 // Set Reset Vector
+		// Nes.ram[0xFFFD] = 0x80;
 
-		// Convert hex string into bytes for RAM
-		std::stringstream ss;
-		ss << "A2 0A 8E 00 00 A2 03 8E 01 00 AC 00 00 A9 00 18 6D 01 00 88 D0 FA 8D 02 00 EA EA EA";
-		uint16_t nOffset = 0x8000;
-		while (!ss.eof())
-		{
-			std::string b;
-			ss >> b;
-			Nes.ram[nOffset++] = (uint8_t)std::stoul(b, nullptr, 16);
-		}
-
-		// Set Reset Vector
-		Nes.ram[0xFFFC] = 0x00;
-		Nes.ram[0xFFFD] = 0x80;
+		std::string file = "/home/chrisgsk/projects/CGEmu/files/myfile.bin";
+		load_file(file, Nes.ram, 0x0000, 65536);
 
 		// Dont forget to set IRQ and NMI vectors if you want to play with those
-
-		// std::string file = "/home/chrisgsk/projects/CGEmu/myfile.bin";
-		// load_file(file, Nes.ram);
 
 		// Extract dissassembly
 		mapAsm = Nes.cpu.disassemble(0x0000, 0xFFFF);
@@ -182,26 +153,6 @@ class Example : public olc::PixelGameEngine
 
 int main()
 {
-	// Bus Nes;
-	// std::string file = "/home/chrisgsk/projects/CGEmu/myfile.bin";
-	// load_file(file, Nes.ram);
-
-	// print_memory(Nes.ram);
-
-	// printf("Hello there!");
-
-	// std::string curr_comm;
-
-	// while (true)
-	// {
-	// 	Nes.cpu.clock();
-
-	// 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-	// 	curr_comm = Nes.cpu.lookup[Nes.cpu.opcode].name;
-	// 	std::cout << curr_comm << std::endl;
-	// }
-
 	Example demo;
 	if (demo.Construct(680, 480, 2, 2))
 		demo.Start();

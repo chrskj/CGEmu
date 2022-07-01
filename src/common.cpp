@@ -20,7 +20,7 @@ void print_memory(const std::array<uint8_t, 64 * 1024> &n)
 	printf("\n");
 };
 
-void load_file(std::string file_name, std::array<uint8_t, 64 * 1024> &n)
+void load_file(std::string file_name, std::array<uint8_t, 64 * 1024> &n, uint16_t _offset, int _size)
 {
 	try
 	{
@@ -33,7 +33,8 @@ void load_file(std::string file_name, std::array<uint8_t, 64 * 1024> &n)
 			std::vector<uint8_t> v_buf((std::istreambuf_iterator<char>(bin_file)), (std::istreambuf_iterator<char>()));
 			bin_file.close();
 
-			std::copy_n(v_buf.begin(), 64 * 1024, n.begin());
+			// std::copy_n(v_buf.begin(), 64 * 1024, n.begin());
+			std::copy_n(v_buf.begin(), _size, n.begin() + _offset);
 		}
 		else
 		{
