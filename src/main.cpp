@@ -63,7 +63,7 @@ class Example : public olc::PixelGameEngine
 		DrawString(x, y + 20, "A: $" + hex(Nes.cpu.A, 2) + "  [" + std::to_string(Nes.cpu.A) + "]");
 		DrawString(x, y + 30, "X: $" + hex(Nes.cpu.X, 2) + "  [" + std::to_string(Nes.cpu.X) + "]");
 		DrawString(x, y + 40, "Y: $" + hex(Nes.cpu.Y, 2) + "  [" + std::to_string(Nes.cpu.Y) + "]");
-		DrawString(x, y + 50, "Stack P: $" + hex(Nes.cpu.S, 4));
+		DrawString(x, y + 50, "Stack P: $01" + hex(Nes.cpu.S, 2));
 	}
 
 	void DrawCode(int x, int y, int nLines)
@@ -133,11 +133,11 @@ class Example : public olc::PixelGameEngine
 		if (GetKey(olc::Key::R).bPressed)
 			Nes.cpu.reset();
 
-		// if (GetKey(olc::Key::I).bPressed)
-		// 	Nes.cpu.irq();
+		if (GetKey(olc::Key::I).bPressed)
+			Nes.cpu.irq();
 
-		// if (GetKey(olc::Key::N).bPressed)
-		// 	Nes.cpu.nmi();
+		if (GetKey(olc::Key::N).bPressed)
+			Nes.cpu.nmi();
 
 		// Draw Ram Page 0x00
 		DrawRam(2, 2, 0x0000, 16, 16);

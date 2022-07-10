@@ -66,8 +66,7 @@ void cg6502::clock()
 {
 	if (cycles == 0)
 	{
-		opcode = read(PC);
-		PC++;
+		opcode = read(PC++);
 		cycles = lookup[opcode].cycles;
 
 		uint8_t additional_cycle_1 = (this->*lookup[opcode].addrmode)();
@@ -100,6 +99,7 @@ uint8_t cg6502::ACC()
 }
 uint8_t cg6502::IMP()
 {
+	fetched = A;
 	return 0;
 }
 uint8_t cg6502::IMM()
@@ -178,6 +178,8 @@ uint8_t cg6502::LDA()
 {
 	fetch();
 	A = fetched;
+	set_flag(Z, A == 0x00);
+	set_flag(N, A & 0x80);
 	return 0;
 }
 // Load X Register
@@ -185,6 +187,8 @@ uint8_t cg6502::LDX()
 {
 	fetch();
 	X = fetched;
+	set_flag(Z, X == 0x00);
+	set_flag(N, X & 0x80);
 	return 1;
 }
 // Load Y Register
@@ -192,6 +196,8 @@ uint8_t cg6502::LDY()
 {
 	fetch();
 	Y = fetched;
+	set_flag(Z, Y == 0x00);
+	set_flag(N, Y & 0x80);
 	return 1;
 }
 // Store Accumulator
@@ -222,7 +228,7 @@ uint8_t cg6502::TAX()
 }
 // Transfer accumulator to Y
 uint8_t cg6502::TAY()
-{	
+{
 	Y = A;
 	set_flag(Z, Y == 0x00);
 	set_flag(N, Y & 0x80);
@@ -263,55 +269,80 @@ uint8_t cg6502::TXS()
 // Push accumulator on stack
 uint8_t cg6502::PHA()
 {
-	write(S, X);
+	addr_abs = ((uint16_t)0x01 << 8) | S--;
+	write(addr_abs, A);
 	return 0;
 }
 // Push processor status on stack
 uint8_t cg6502::PHP()
 {
+	addr_abs = ((uint16_t)0x01 << 8) | S--;
+	write(addr_abs, P);
 	return 0;
 }
 // Pull accumulator from stack
 uint8_t cg6502::PLA()
 {
+	addr_abs = ((uint16_t)0x01 << 8) | ++S;
+	A		 = read(addr_abs);
+	set_flag(Z, A == 0x00);
+	set_flag(N, A & 0x80);
 	return 0;
 }
 // Pull processor status from stack
 uint8_t cg6502::PLP()
 {
+	addr_abs = ((uint16_t)0x01 << 8) | ++S;
+	P		 = read(addr_abs);
 	return 0;
 }
 // Logical AND
 uint8_t cg6502::AND()
 {
+	fetch();
+	A &= fetched;
+	set_flag(Z, A == 0x00);
+	set_flag(N, A & 0x80);
 	return 0;
 }
 // Exclusive OR
 uint8_t cg6502::EOR()
 {
+	fetch();
+	A ^= fetched;
+	set_flag(Z, A == 0x00);
+	set_flag(N, A & 0x80);
 	return 0;
 }
 // Logical Inclusive OR
 uint8_t cg6502::ORA()
 {
+	fetch();
+	A |= fetched;
+	set_flag(Z, A == 0x00);
+	set_flag(N, A & 0x80);
 	return 0;
 }
 // Bit Test
 uint8_t cg6502::BIT()
 {
+	fetch();
+	set_flag(Z, (A & fetched) == 0x00);
+	set_flag(V, fetched & 0x40);
+	set_flag(N, fetched & 0x80);
 	return 0;
 }
 // Add with Carry
 uint8_t cg6502::ADC()
 {
 	fetch();
-    uint16_t temp = (uint16_t)A + (uint16_t)fetched + (uint16_t)get_flag(C);
+	uint16_t temp = (uint16_t)A + (uint16_t)fetched + (uint16_t)get_flag(C);
 
 	set_flag(C, (temp > 0xFF));
 	set_flag(Z, (temp & 0x00FF) == 0);
 	set_flag(N, temp & 0x80);
-    // The overflow flag is set when the sign of the addends is the same and
-    // differs from the sign of the sum
+	// The overflow flag is set when the sign of the addends is the same and
+	// differs from the sign of the sum
 	set_flag(V, (~((uint16_t)A ^ (uint16_t)fetched) & ((uint16_t)A ^ (uint16_t)temp) & 0x0080));
 	A = temp & 0x00FF;
 	return 1;
@@ -319,41 +350,80 @@ uint8_t cg6502::ADC()
 // Subtract with Carry
 uint8_t cg6502::SBC()
 {
+	fetch();
+	uint16_t temp = (uint16_t)A + (~((uint16_t)fetched) + 1) + (uint16_t)get_flag(C);
+
+	set_flag(C, (temp > 0xFF));
+	set_flag(Z, (temp & 0x00FF) == 0);
+	set_flag(N, temp & 0x80);
+	// The overflow flag is set when the sign of the addends is the same and
+	// differs from the sign of the sum
+	set_flag(V, (~((uint16_t)A ^ (uint16_t)fetched) & ((uint16_t)A ^ (uint16_t)temp) & 0x0080));
+	A = temp & 0x00FF;
 	return 1;
 }
 // Compare accumulator
 uint8_t cg6502::CMP()
 {
+	fetch();
+	uint16_t temp = (uint16_t)A + (~((uint16_t)fetched) + 1);
+	set_flag(C, (temp > 0xFF));
+	set_flag(Z, (temp & 0x00FF) == 0);
+	set_flag(N, temp & 0x80);
 	return 0;
 }
 // Compare X register
 uint8_t cg6502::CPX()
 {
+	uint16_t temp = (uint16_t)A + (~((uint16_t)X) + 1);
+	set_flag(C, (temp > 0xFF));
+	set_flag(Z, (temp & 0x00FF) == 0);
+	set_flag(N, temp & 0x80);
 	return 0;
 }
 // Compare Y register
 uint8_t cg6502::CPY()
 {
+	uint16_t temp = (uint16_t)A + (~((uint16_t)Y) + 1);
+	set_flag(C, (temp > 0xFF));
+	set_flag(Z, (temp & 0x00FF) == 0);
+	set_flag(N, temp & 0x80);
 	return 0;
 }
 // Increment a memory location
 uint8_t cg6502::INC()
 {
+	fetch();
+	fetched++;
+	write(addr_abs, fetched);
+	set_flag(Z, fetched == 0x00);
+	set_flag(N, fetched & 0x80);
 	return 1;
 }
 // Increment the X register
 uint8_t cg6502::INX()
 {
+	X++;
+	set_flag(Z, X == 0x00);
+	set_flag(N, X & 0x80);
 	return 0;
 }
 // Increment the Y register
 uint8_t cg6502::INY()
 {
+	Y++;
+	set_flag(Z, Y == 0x00);
+	set_flag(N, Y & 0x80);
 	return 0;
 }
 // Decrement a memory location
 uint8_t cg6502::DEC()
 {
+	fetch();
+	fetched--;
+	write(addr_abs, fetched);
+	set_flag(Z, fetched == 0x00);
+	set_flag(N, fetched & 0x80);
 	return 0;
 }
 // Decrement the X register
@@ -375,36 +445,87 @@ uint8_t cg6502::DEY()
 // Arithmetic Shift Left
 uint8_t cg6502::ASL()
 {
+	fetch();
+	set_flag(C, fetched & 0x0080);
+	uint16_t temp = fetched << 1;
+	set_flag(Z, (temp & 0x00FF) == 0x0000);
+	set_flag(N, temp & 0x0080);
+	if (lookup[opcode].addrmode == &cg6502::IMP)
+		A = temp & 0x00FF;
+	else
+		write(addr_abs, temp & 0x00FF);
 	return 0;
 }
 // Logical Shift Right
 uint8_t cg6502::LSR()
 {
+	fetch();
+	set_flag(C, fetched & 0x0001);
+	uint16_t temp = fetched >> 1;
+	set_flag(Z, (temp & 0x00FF) == 0x0000);
+	set_flag(N, temp & 0x0080);
+	if (lookup[opcode].addrmode == &cg6502::IMP)
+		A = temp & 0x00FF;
+	else
+		write(addr_abs, temp & 0x00FF);
 	return 0;
 }
 // Rotate Left
 uint8_t cg6502::ROL()
 {
+	fetch();
+	uint16_t temp = (uint16_t)(fetched << 1) | get_flag(C);
+	set_flag(C, temp & 0xFF00);
+	set_flag(Z, (temp & 0x00FF) == 0x0000);
+	set_flag(N, temp & 0x0080);
+	if (lookup[opcode].addrmode == &cg6502::IMP)
+		A = temp & 0x00FF;
+	else
+		write(addr_abs, temp & 0x00FF);
 	return 0;
 }
 // Rotate Right
 uint8_t cg6502::ROR()
 {
+	fetch();
+	uint16_t temp = (uint16_t)(get_flag(C) << 7) | (fetched >> 1);
+	set_flag(C, fetched & 0x01);
+	set_flag(Z, (temp & 0x00FF) == 0x00);
+	set_flag(N, temp & 0x0080);
+	if (lookup[opcode].addrmode == &cg6502::IMP)
+		A = temp & 0x00FF;
+	else
+		write(addr_abs, temp & 0x00FF);
 	return 0;
 }
 // Jump to another location
 uint8_t cg6502::JMP()
 {
+	PC = addr_abs;
 	return 0;
 }
 // Jump to a subroutine
 uint8_t cg6502::JSR()
 {
+	uint16_t temp = ((uint16_t)0x01 << 8) | S--;
+	write(temp, (uint8_t)addr_abs);
+	PC = addr_abs;
 	return 0;
 }
 // Return from subroutine
 uint8_t cg6502::RTS()
 {
+	uint16_t temp = ((uint16_t)0x01 << 8) | ++S;
+	PC			  = (PC << 8) | read(temp);
+	return 0;
+}
+// Return from Interrupt
+uint8_t cg6502::RTI()
+{
+	uint16_t temp = ((uint16_t)0x01 << 8) | ++S;
+	P			  = read(temp);
+	temp		  = ((uint16_t)0x01 << 8) | ++S;
+	PC			  = (PC << 8) | read(temp);
 	return 0;
 }
 // Branch if carry flag clear
@@ -572,15 +693,18 @@ uint8_t cg6502::SEI()
 // Force an interrupt
 uint8_t cg6502::BRK()
 {
+	addr_abs = ((uint16_t)0x01 << 8) | S--;
+	write(addr_abs, P);
+	addr_abs = ((uint16_t)0x01 << 8) | S--;
+	write(addr_abs, PC);
+
+	addr_abs = ((uint16_t)read(0xFFFF) << 8) | read(0xFFFE);
+	PC		 = read(addr_abs);
+	set_flag(B, 1);
 	return 0;
 }
 // No Operation
 uint8_t cg6502::NOP()
-{
-	return 0;
-}
-// Return from Interrupt
-uint8_t cg6502::RTI()
 {
 	return 0;
 }
