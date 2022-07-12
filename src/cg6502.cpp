@@ -367,7 +367,7 @@ uint8_t cg6502::CMP()
 {
 	fetch();
 	uint16_t temp = (uint16_t)A + (~((uint16_t)fetched) + 1);
-	set_flag(C, (temp > 0xFF));
+	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
 	set_flag(Z, (temp & 0x00FF) == 0);
 	set_flag(N, temp & 0x80);
 	return 0;
@@ -375,8 +375,9 @@ uint8_t cg6502::CMP()
 // Compare X register
 uint8_t cg6502::CPX()
 {
-	uint16_t temp = (uint16_t)A + (~((uint16_t)X) + 1);
-	set_flag(C, (temp > 0xFF));
+	fetch();
+	uint16_t temp = (uint16_t)X + (~((uint16_t)fetched) + 1);
+	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
 	set_flag(Z, (temp & 0x00FF) == 0);
 	set_flag(N, temp & 0x80);
 	return 0;
@@ -384,8 +385,9 @@ uint8_t cg6502::CPX()
 // Compare Y register
 uint8_t cg6502::CPY()
 {
-	uint16_t temp = (uint16_t)A + (~((uint16_t)Y) + 1);
-	set_flag(C, (temp > 0xFF));
+	fetch();
+	uint16_t temp = (uint16_t)Y + (~((uint16_t)fetched) + 1);
+	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
 	set_flag(Z, (temp & 0x00FF) == 0);
 	set_flag(N, temp & 0x80);
 	return 0;
@@ -846,7 +848,7 @@ std::map<uint16_t, std::string> cg6502::disassemble(uint16_t nStart, uint16_t nS
 		{
 			value = bus->read(addr, true);
 			addr++;
-			sInst += "$" + hex(value, 2) + " [$" + hex(addr + value, 4) + "] {REL}";
+			sInst += "$" + hex(value, 2) + " [$" + hex(addr + (int8_t)value, 4) + "] {REL}";
 		}
 
 		// Add the formed string to a std::map, using the instruction's
