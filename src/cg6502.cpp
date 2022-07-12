@@ -269,22 +269,21 @@ uint8_t cg6502::TXS()
 // Push accumulator on stack
 uint8_t cg6502::PHA()
 {
-	addr_abs = ((uint16_t)0x01 << 8) | S--;
-	write(addr_abs, A);
+	write(0x0100 + S--, A);
 	return 0;
 }
 // Push processor status on stack
 uint8_t cg6502::PHP()
 {
-	addr_abs = ((uint16_t)0x01 << 8) | S--;
-	write(addr_abs, P);
+	write(0x0100 + S--, P | B | U);
+	set_flag(B, 0);
+	set_flag(U, 0);
 	return 0;
 }
 // Pull accumulator from stack
 uint8_t cg6502::PLA()
 {
-	addr_abs = ((uint16_t)0x01 << 8) | ++S;
-	A		 = read(addr_abs);
+	A = read(0x0100 + ++S);
 	set_flag(Z, A == 0x00);
 	set_flag(N, A & 0x80);
 	return 0;
@@ -292,8 +291,8 @@ uint8_t cg6502::PLA()
 // Pull processor status from stack
 uint8_t cg6502::PLP()
 {
-	addr_abs = ((uint16_t)0x01 << 8) | ++S;
-	P		 = read(addr_abs);
+	P = read(0x0100 + ++S);
+	set_flag(U, 1);
 	return 0;
 }
 // Logical AND
