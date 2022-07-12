@@ -149,8 +149,12 @@ uint8_t cg6502::IZY()
 uint8_t cg6502::REL()
 {
 	addr_rel = read(PC++);
+	// printf("read(%04x) = addr_rel: %d, hex: %04x \n", PC - 1, (int16_t)addr_rel, addr_rel);
 	if (addr_rel & 0x80)
+	{
+		// printf("Negative number!\n");
 		addr_rel |= 0xFF00;
+	}
 	return 0;
 }
 
@@ -367,6 +371,8 @@ uint8_t cg6502::CMP()
 {
 	fetch();
 	uint16_t temp = (uint16_t)A + (~((uint16_t)fetched) + 1);
+	printf("temp: %04x\t", temp);
+	printf("C1: %d C2: %d\n", ((temp & 0x00FF) > 0xFF), (temp & 0x00FF) == 0);
 	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
 	set_flag(Z, (temp & 0x00FF) == 0);
 	set_flag(N, temp & 0x80);
@@ -567,6 +573,7 @@ uint8_t cg6502::BEQ()
 	{
 		cycles++;
 		addr_abs = PC + addr_rel;
+		// printf("abs: %d PC: %d  rel: %d\n", addr_abs, PC, (int16_t)addr_rel);
 
 		if ((addr_abs & 0xFF00) != (PC & 0xFF00))
 			cycles++;

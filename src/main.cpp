@@ -20,6 +20,7 @@ class Example : public olc::PixelGameEngine
 		sAppName = "Example";
 	}
 
+	bool stop = False;
 	Bus Nes;
 	std::map<uint16_t, std::string> mapAsm;
 
@@ -100,13 +101,14 @@ class Example : public olc::PixelGameEngine
 
 	bool OnUserCreate() override
 	{
-		std::string file = "/home/chrisgsk/projects/CGEmu/files/testADC.bin";
-		load_file(file, Nes.ram, 0x8000, 28);
-		Nes.ram[0xFFFC] = 0x00;	 // Set Reset Vector
-		Nes.ram[0xFFFD] = 0x80;
+		// std::string file = "/home/chrisgsk/projects/CGEmu/files/testADC.bin";
+		// load_file(file, Nes.ram, 0x8000, 28);
+		// Nes.ram[0xFFFC] = 0x00;	 // Set Reset Vector
+		// Nes.ram[0xFFFD] = 0x80;
 
-		// std::string file = "/home/chrisgsk/projects/CGEmu/files/6502_functional_test.bin";
-		// load_file(file, Nes.ram, 0x0000, 65536);
+		std::string file = "/home/chrisgsk/projects/CGEmu/files/6502_functional_test.bin";
+		load_file(file, Nes.ram, 0x0000, 65536);
+		Nes.cpu.PC = 0x0400;
 
 		// Dont forget to set IRQ and NMI vectors if you want to play with those
 
@@ -114,7 +116,7 @@ class Example : public olc::PixelGameEngine
 		mapAsm = Nes.cpu.disassemble(0x0000, 0xFFFF);
 
 		// Reset
-		Nes.cpu.reset();
+		// Nes.cpu.reset();
 		return true;
 	}
 
@@ -129,6 +131,12 @@ class Example : public olc::PixelGameEngine
 				Nes.cpu.clock();
 			} while (!Nes.cpu.complete());
 		}
+		
+		if (Nes.cpu.PC == 0x0670)
+			stop = True;
+
+		if (!stop)
+			Nes.cpu.clock();
 
 		if (GetKey(olc::Key::R).bPressed)
 			Nes.cpu.reset();
@@ -141,7 +149,7 @@ class Example : public olc::PixelGameEngine
 
 		// Draw Ram Page 0x00
 		DrawRam(2, 2, 0x0000, 16, 16);
-		DrawRam(2, 182, 0x8000, 16, 16);
+		DrawRam(2, 182, 0x0400, 16, 16);
 		DrawCpu(448, 2);
 		DrawCode(448, 72, 26);
 
