@@ -133,7 +133,7 @@ class Example : public olc::PixelGameEngine
 			} while (!Nes.cpu.complete());
 		}
 		
-		if (Nes.cpu.PC == 0x0670)
+		if (Nes.cpu.PC == 0x095c)
 			stop = True;
 
 		if (!stop)
@@ -147,9 +147,6 @@ class Example : public olc::PixelGameEngine
 			else
 				stop = True;
 		}
-
-		if (Nes.cpu.PC == 0x0670)
-			stop = True;
 
 		if (!stop)
 			Nes.cpu.clock();

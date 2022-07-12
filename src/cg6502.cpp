@@ -93,10 +93,6 @@ void cg6502::nmi()
 }
 
 // Something something
-uint8_t cg6502::ACC()
-{
-	return 0;
-}
 uint8_t cg6502::IMP()
 {
 	fetched = A;
@@ -109,41 +105,80 @@ uint8_t cg6502::IMM()
 }
 uint8_t cg6502::ZP0()
 {
+	uint8_t addr_abs_low  = read(PC++);
+	addr_abs			  = 0x0000 + addr_abs_low;
 	return 0;
 }
 uint8_t cg6502::ZPX()
 {
+	uint8_t addr_abs_low  = read(PC++);
+	addr_abs			  = 0x0000 + addr_abs_low + X;
 	return 0;
 }
 uint8_t cg6502::ZPY()
 {
+	uint8_t addr_abs_low  = read(PC++);
+	addr_abs			  = 0x0000 + addr_abs_low + Y;
 	return 0;
 }
 uint8_t cg6502::ABS()
 {
 	uint8_t addr_abs_low  = read(PC++);
 	uint8_t addr_abs_high = read(PC++);
-	addr_abs			  = ((uint16_t)addr_abs_high << 8) | addr_abs_low;
+	addr_abs			  = ((uint16_t)addr_abs_high << 8) + addr_abs_low;
 	return 0;
 }
 uint8_t cg6502::ABX()
 {
+	uint8_t addr_abs_low  = read(PC++);
+	uint8_t addr_abs_high = read(PC++);
+	addr_abs			  = ((uint16_t)addr_abs_high << 8) + addr_abs_low + X;
 	return 0;
 }
 uint8_t cg6502::ABY()
 {
+	uint8_t addr_abs_low  = read(PC++);
+	uint8_t addr_abs_high = read(PC++);
+	addr_abs			  = ((uint16_t)addr_abs_high << 8) + addr_abs_low + Y;
 	return 0;
 }
 uint8_t cg6502::IND()
 {
+	uint8_t addr_abs_low  = read(PC++);
+	uint8_t addr_abs_high = read(PC++);
+
+	uint16_t addr_ind = (((uint16_t)addr_abs_high << 8) + addr_abs_low);
+
+	uint8_t addr_ind_high = read(addr_ind++);
+	uint8_t addr_ind_low  = read(addr_ind);
+	// printf("addr_ind: %04x, high: %04x, low: %04x\n", addr_ind - 1, addr_abs_high, addr_ind_low);
+
+	addr_abs = (((uint16_t)addr_ind_high << 8) | addr_ind_low);
+
 	return 0;
 }
 uint8_t cg6502::IZX()
-{
+{	
+	uint8_t addr_abs_low  = read(PC++);
+
+	uint16_t addr_ind = (0x0000 + addr_abs_low + X);
+
+	uint8_t addr_ind_high = read(addr_ind++);
+	uint8_t addr_ind_low  = read(addr_ind);
+
+	addr_abs = (((uint16_t)addr_ind_high << 8) | addr_ind_low);
 	return 0;
 }
 uint8_t cg6502::IZY()
 {
+	uint8_t addr_abs_low  = read(PC++);
+
+	uint16_t addr_ind = (0x0000 + addr_abs_low);
+
+	uint8_t addr_ind_high = read(addr_ind++);
+	uint8_t addr_ind_low  = read(addr_ind) + Y;
+
+	addr_abs = (((uint16_t)addr_ind_high << 8) | addr_ind_low);
 	return 0;
 }
 uint8_t cg6502::REL()
@@ -370,8 +405,8 @@ uint8_t cg6502::CMP()
 {
 	fetch();
 	uint16_t temp = (uint16_t)A + (~((uint16_t)fetched) + 1);
-	printf("temp: %04x\t", temp);
-	printf("C1: %d C2: %d\n", ((temp & 0x00FF) > 0xFF), (temp & 0x00FF) == 0);
+	// printf("temp: %04x\t", temp);
+	// printf("C1: %d C2: %d\n", ((temp & 0x00FF) > 0xFF), (temp & 0x00FF) == 0);
 	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
 	set_flag(Z, (temp & 0x00FF) == 0);
 	set_flag(N, temp & 0x80);
