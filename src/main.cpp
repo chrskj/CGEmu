@@ -107,6 +107,7 @@ class Example : public olc::PixelGameEngine
 		// Nes.ram[0xFFFD] = 0x80;
 
 		std::string file = "/home/chrisgsk/projects/CGEmu/files/6502_functional_test.bin";
+		// std::string file = "/home/cgs/hobby-projects/CGemu/files/6502_functional_test.bin";
 		load_file(file, Nes.ram, 0x0000, 65536);
 		Nes.cpu.PC = 0x0400;
 
@@ -132,6 +133,21 @@ class Example : public olc::PixelGameEngine
 			} while (!Nes.cpu.complete());
 		}
 		
+		if (Nes.cpu.PC == 0x0670)
+			stop = True;
+
+		if (!stop)
+			Nes.cpu.clock();
+
+		// Debugging
+		if (GetKey(olc::Key::S).bPressed)
+		{
+			if (stop)
+				stop = False;
+			else
+				stop = True;
+		}
+
 		if (Nes.cpu.PC == 0x0670)
 			stop = True;
 
