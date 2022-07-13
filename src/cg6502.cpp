@@ -574,19 +574,19 @@ uint8_t cg6502::JSR()
 // Return from subroutine
 uint8_t cg6502::RTS()
 {
-	PC = (uint16_t)read(0x0100 + S++);
-	PC |= (uint16_t)read(0x0100 + S++) << 8;
+	PC = (uint16_t)read(0x0100 + ++S);
+	PC |= (uint16_t)read(0x0100 + ++S) << 8;
 	PC++;
 	return 0;
 }
 // Return from Interrupt
 uint8_t cg6502::RTI()
 {
-	P = read(0x0100 + S++);
+	P = read(0x0100 + ++S);
 	P &= ~B;
 	P &= ~U;
-	PC = (uint16_t)read(0x0100 + S++);
-	PC |= (uint16_t)read(0x0100 + S++) << 8;
+
+	PC |= (uint16_t)read(0x0100 + ++S) << 8;
 	return 0;
 }
 // Branch if carry flag clear

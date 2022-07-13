@@ -133,7 +133,7 @@ class Example : public olc::PixelGameEngine
 			} while (!Nes.cpu.complete());
 		}
 		
-		if (Nes.cpu.PC == 0x095c)
+		if (Nes.cpu.PC == 0x37bf)
 			stop = True;
 
 		if (!stop)
