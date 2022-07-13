@@ -105,81 +105,97 @@ uint8_t cg6502::IMM()
 }
 uint8_t cg6502::ZP0()
 {
-	uint8_t addr_abs_low  = read(PC++);
-	addr_abs			  = 0x0000 + addr_abs_low;
+	addr_abs = read(PC++);
+	addr_abs &= 0x00FF;
 	return 0;
 }
 uint8_t cg6502::ZPX()
 {
-	uint8_t addr_abs_low  = read(PC++);
-	addr_abs			  = 0x0000 + addr_abs_low + X;
+	addr_abs = (read(PC++) + X);
+	addr_abs &= 0x00FF;
 	return 0;
 }
 uint8_t cg6502::ZPY()
 {
-	uint8_t addr_abs_low  = read(PC++);
-	addr_abs			  = 0x0000 + addr_abs_low + Y;
+	addr_abs = (read(PC++) + Y);
+	addr_abs &= 0x00FF;
 	return 0;
 }
 uint8_t cg6502::ABS()
 {
-	uint8_t addr_abs_low  = read(PC++);
-	uint8_t addr_abs_high = read(PC++);
-	addr_abs			  = ((uint16_t)addr_abs_high << 8) + addr_abs_low;
+	uint8_t lo = read(PC++);
+	uint8_t hi = read(PC++);
+	addr_abs   = ((uint16_t)hi << 8) + lo;
 	return 0;
 }
 uint8_t cg6502::ABX()
 {
-	uint8_t addr_abs_low  = read(PC++);
-	uint8_t addr_abs_high = read(PC++);
-	addr_abs			  = ((uint16_t)addr_abs_high << 8) + addr_abs_low + X;
-	return 0;
+	uint8_t lo = read(PC++);
+	uint8_t hi = read(PC++);
+
+	addr_abs = ((uint16_t)hi << 8) | lo;
+	addr_abs += X;
+
+	if ((addr_abs & 0xFF00) != (hi << 8))
+		return 1;
+	else
+		return 0;
 }
 uint8_t cg6502::ABY()
 {
-	uint8_t addr_abs_low  = read(PC++);
-	uint8_t addr_abs_high = read(PC++);
-	addr_abs			  = ((uint16_t)addr_abs_high << 8) + addr_abs_low + Y;
-	return 0;
+	uint8_t lo = read(PC++);
+	uint8_t hi = read(PC++);
+
+	addr_abs = ((uint16_t)hi << 8) | lo;
+	addr_abs += Y;
+
+	if ((addr_abs & 0xFF00) != (hi << 8))
+		return 1;
+	else
+		return 0;
 }
 uint8_t cg6502::IND()
 {
-	uint8_t addr_abs_low  = read(PC++);
-	uint8_t addr_abs_high = read(PC++);
+	uint8_t ptr_low	 = read(PC++);
+	uint8_t ptr_high = read(PC++);
 
-	uint16_t addr_ind = (((uint16_t)addr_abs_high << 8) + addr_abs_low);
+	uint16_t ptr = (((uint16_t)ptr_high << 8) | ptr_low);
 
-	uint8_t addr_ind_high = read(addr_ind++);
-	uint8_t addr_ind_low  = read(addr_ind);
-	// printf("addr_ind: %04x, high: %04x, low: %04x\n", addr_ind - 1, addr_abs_high, addr_ind_low);
-
-	addr_abs = (((uint16_t)addr_ind_high << 8) | addr_ind_low);
-
+	addr_abs = (read(ptr + 1) << 8) | read(ptr + 0);
+	// if (ptr_low == 0x00FF)	// Simulate page boundary hardware bug
+	// {
+	// 	addr_abs = (read(ptr & 0xFF00) << 8) | read(ptr + 0);
+	// }
+	// else  // Behave normally
+	// {
+	// 	addr_abs = (read(ptr + 1) << 8) | read(ptr + 0);
+	// }
 	return 0;
 }
 uint8_t cg6502::IZX()
-{	
-	uint8_t addr_abs_low  = read(PC++);
+{
+	uint16_t t = (read(PC++) + X);
 
-	uint16_t addr_ind = (0x0000 + addr_abs_low + X);
+	uint16_t lo = read(t & 0x00FF);
+	uint16_t hi = read((t + 1) & 0x00FF);
 
-	uint8_t addr_ind_high = read(addr_ind++);
-	uint8_t addr_ind_low  = read(addr_ind);
-
-	addr_abs = (((uint16_t)addr_ind_high << 8) | addr_ind_low);
+	addr_abs = (hi << 8) | lo;
 	return 0;
 }
 uint8_t cg6502::IZY()
 {
-	uint8_t addr_abs_low  = read(PC++);
+	uint16_t t = read(PC++);
 
-	uint16_t addr_ind = (0x0000 + addr_abs_low);
+	uint16_t lo = read(t & 0x00FF);
+	uint16_t hi = read((t + 1) & 0x00FF);
 
-	uint8_t addr_ind_high = read(addr_ind++);
-	uint8_t addr_ind_low  = read(addr_ind) + Y;
+	addr_abs = (hi << 8) | lo;
+	addr_abs += Y;
 
-	addr_abs = (((uint16_t)addr_ind_high << 8) | addr_ind_low);
-	return 0;
+	if ((addr_abs & 0xFF00) != (hi << 8))
+		return 1;
+	else
+		return 0;
 }
 uint8_t cg6502::REL()
 {
@@ -416,20 +432,20 @@ uint8_t cg6502::CMP()
 uint8_t cg6502::CPX()
 {
 	fetch();
-	uint16_t temp = (uint16_t)X + (~((uint16_t)fetched) + 1);
-	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
-	set_flag(Z, (temp & 0x00FF) == 0);
-	set_flag(N, temp & 0x80);
+	uint16_t temp = (uint16_t)X - (uint16_t)fetched;
+	set_flag(C, X >= fetched);
+	set_flag(Z, (temp & 0x00FF) == 0x0000);
+	set_flag(N, temp & 0x0080);
 	return 0;
 }
 // Compare Y register
 uint8_t cg6502::CPY()
 {
 	fetch();
-	uint16_t temp = (uint16_t)Y + (~((uint16_t)fetched) + 1);
-	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
-	set_flag(Z, (temp & 0x00FF) == 0);
-	set_flag(N, temp & 0x80);
+	uint16_t temp = (uint16_t)Y - (uint16_t)fetched;
+	set_flag(C, Y >= fetched);
+	set_flag(Z, (temp & 0x00FF) == 0x0000);
+	set_flag(N, temp & 0x0080);
 	return 0;
 }
 // Increment a memory location
@@ -549,25 +565,28 @@ uint8_t cg6502::JMP()
 // Jump to a subroutine
 uint8_t cg6502::JSR()
 {
-	uint16_t temp = ((uint16_t)0x01 << 8) | S--;
-	write(temp, (uint8_t)addr_abs);
+	PC--;
+	write(0x0100 + S--, (PC >> 8) & 0x00FF);
+	write(0x0100 + S--, PC & 0x00FF);
 	PC = addr_abs;
 	return 0;
 }
 // Return from subroutine
 uint8_t cg6502::RTS()
 {
-	uint16_t temp = ((uint16_t)0x01 << 8) | ++S;
-	PC			  = (PC << 8) | read(temp);
+	PC = (uint16_t)read(0x0100 + S++);
+	PC |= (uint16_t)read(0x0100 + S++) << 8;
+	PC++;
 	return 0;
 }
 // Return from Interrupt
 uint8_t cg6502::RTI()
 {
-	uint16_t temp = ((uint16_t)0x01 << 8) | ++S;
-	P			  = read(temp);
-	temp		  = ((uint16_t)0x01 << 8) | ++S;
-	PC			  = (PC << 8) | read(temp);
+	P = read(0x0100 + S++);
+	P &= ~B;
+	P &= ~U;
+	PC = (uint16_t)read(0x0100 + S++);
+	PC |= (uint16_t)read(0x0100 + S++) << 8;
 	return 0;
 }
 // Branch if carry flag clear
@@ -736,14 +755,17 @@ uint8_t cg6502::SEI()
 // Force an interrupt
 uint8_t cg6502::BRK()
 {
-	addr_abs = ((uint16_t)0x01 << 8) | S--;
-	write(addr_abs, P);
-	addr_abs = ((uint16_t)0x01 << 8) | S--;
-	write(addr_abs, PC);
+	PC++;
 
-	addr_abs = ((uint16_t)read(0xFFFF) << 8) | read(0xFFFE);
-	PC		 = read(addr_abs);
+	set_flag(I, 1);
+	write(0x0100 + S--, (PC >> 8) & 0x00FF);
+	write(0x0100 + S--, PC & 0x00FF);
+
 	set_flag(B, 1);
+	write(0x0100 + S--, P);
+	set_flag(B, 0);
+
+	PC = (uint16_t)read(0xFFFE) | ((uint16_t)read(0xFFFF) << 8);
 	return 0;
 }
 // No Operation
