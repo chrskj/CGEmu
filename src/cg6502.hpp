@@ -105,7 +105,7 @@ class cg6502
 		return !!(P & f);  // '!!' to make sure this returns 0 or 1
 	}
 
-	void set_flag(Status_flag f, uint8_t v)
+	void set_flag(Status_flag f, bool v)
 	{
 		if (v)
 			P |= f;
