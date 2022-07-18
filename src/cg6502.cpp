@@ -81,15 +81,64 @@ void cg6502::reset()
 {
 	// cycles = 6;
 	set_flag(I, 1);
-	uint8_t PC_low	= read(0xFFFC);
-	uint8_t PC_high = read(0xFFFD);
-	PC				= ((uint16_t)PC_high << 8) | PC_low;
+	uint8_t lo = read(0xFFFC);
+	uint8_t hi = read(0xFFFD);
+	PC		   = ((uint16_t)hi << 8) | lo;
+
+	// Reset internal registers
+	A = 0;
+	X = 0;
+	Y = 0;
+	S = 0xFD;
+	P = 0x00 | U;
+
+	// Clear internal helper variables
+	addr_rel = 0x0000;
+	addr_abs = 0x0000;
+	fetched = 0x00;
+
+	// Reset takes time
+	cycles = 8;
 }
 void cg6502::irq()
 {
+	if (get_flag(I) == 0)
+	{
+		write(0x0100 + S--, (PC >> 8) & 0x00FF);
+		write(0x0100 + S--, PC & 0x00FF);
+
+		// Then Push the status register to the stack
+		set_flag(B, 0);
+		set_flag(U, 1);
+		set_flag(I, 1);
+		write(0x0100 + S--, P);
+
+		// Read new program counter location from fixed address
+		addr_abs	= 0xFFFE;
+		uint16_t lo = read(addr_abs + 0);
+		uint16_t hi = read(addr_abs + 1);
+		PC			= (hi << 8) | lo;
+
+		// IRQs take time
+		cycles = 7;
+	}
 }
 void cg6502::nmi()
 {
+	write(0x0100 + S--, (PC >> 8) & 0x00FF);
+	write(0x0100 + S--, PC & 0x00FF);
+
+	set_flag(B, 0);
+	set_flag(U, 1);
+	set_flag(I, 1);
+	write(0x0100 + S--, P);
+
+	addr_abs	= 0xFFFA;
+	uint16_t lo = read(addr_abs + 0);
+	uint16_t hi = read(addr_abs + 1);
+	PC			= (hi << 8) | lo;
+
+	cycles = 8;
 }
 
 // Something something
