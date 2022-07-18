@@ -452,14 +452,16 @@ uint8_t cg6502::ADC()
 uint8_t cg6502::SBC()
 {
 	fetch();
-	uint16_t temp = (uint16_t)A + (~((uint16_t)fetched) + 1) + (uint16_t)get_flag(C);
 
-	set_flag(C, (temp > 0xFF));
+	uint16_t value = ((uint16_t)fetched) ^ 0x00FF;
+	uint16_t temp  = (uint16_t)A + value + (uint16_t)get_flag(C);
+
+	set_flag(C, temp & 0xFF00);
 	set_flag(Z, (temp & 0x00FF) == 0);
-	set_flag(N, temp & 0x80);
+	set_flag(N, temp & 0x080);
 	// The overflow flag is set when the sign of the addends is the same and
 	// differs from the sign of the sum
-	set_flag(V, (~((uint16_t)A ^ (uint16_t)fetched) & ((uint16_t)A ^ (uint16_t)temp) & 0x0080));
+	set_flag(V, (temp ^ value) & ((uint16_t)A ^ temp) & 0x0080);
 	A = temp & 0x00FF;
 	return 1;
 }
@@ -467,12 +469,12 @@ uint8_t cg6502::SBC()
 uint8_t cg6502::CMP()
 {
 	fetch();
-	uint16_t temp = (uint16_t)A + (~((uint16_t)fetched) + 1);
+	uint16_t temp = (uint16_t)A - (uint16_t)fetched;
 	// printf("temp: %04x\t", temp);
 	// printf("C1: %d C2: %d\n", ((temp & 0x00FF) > 0xFF), (temp & 0x00FF) == 0);
-	set_flag(C, ((temp & 0x00FF) > 0xFF) || (temp & 0x00FF) == 0);
+	set_flag(C, A >= fetched);
 	set_flag(Z, (temp & 0x00FF) == 0);
-	set_flag(N, temp & 0x80);
+	set_flag(N, temp & 0x0080);
 	return 0;
 }
 // Compare X register
