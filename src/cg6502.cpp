@@ -366,8 +366,6 @@ uint8_t cg6502::TSX()
 uint8_t cg6502::TXS()
 {
 	S = X;
-	set_flag(Z, S == 0x00);
-	set_flag(N, S & 0x80);
 	return 0;
 }
 // Push accumulator on stack
