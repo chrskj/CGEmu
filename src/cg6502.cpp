@@ -635,6 +635,7 @@ uint8_t cg6502::RTI()
 	P &= ~B;
 	P &= ~U;
 
+	PC = (uint16_t)read(0x0100 + ++S);
 	PC |= (uint16_t)read(0x0100 + ++S) << 8;
 	return 0;
 }
@@ -711,6 +712,7 @@ uint8_t cg6502::BNE()
 			cycles++;
 
 		PC = addr_abs;
+		// printf("BNE: %04x\n", PC);
 	}
 	return 0;
 }
@@ -804,15 +806,13 @@ uint8_t cg6502::SEI()
 // Force an interrupt
 uint8_t cg6502::BRK()
 {
-	PC++;
-
-	set_flag(I, 1);
 	write(0x0100 + S--, (PC >> 8) & 0x00FF);
 	write(0x0100 + S--, PC & 0x00FF);
 
 	set_flag(B, 1);
+	// set_flag(U, 1);
 	write(0x0100 + S--, P);
-	set_flag(B, 0);
+	set_flag(I, 1);
 
 	PC = (uint16_t)read(0xFFFE) | ((uint16_t)read(0xFFFF) << 8);
 	return 0;
